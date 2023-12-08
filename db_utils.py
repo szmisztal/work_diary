@@ -33,8 +33,8 @@ class SQLite:
         else:
             print("Cannot create the database connection.")
 
-    def create_day_detail_table(self):
-        query = """CREATE TABLE IF NOT EXISTS day_details(
+    def create_daily_summary_table(self):
+        query = """CREATE TABLE IF NOT EXISTS daily_summaries(
                     date_id INTEGER PRIMARY KEY,
                     day INTEGER NOT NULL,
                     month INTEGER NOT NULL,
@@ -49,31 +49,78 @@ class SQLite:
                     );"""
         self.execute_sql_query(query)
 
-    # def create_salary_table(self):
-    #     query = """CREATE TABLE IF NOT EXISTS salaries(
-    #                 salary_id INTEGER PRIMARY KEY,
-    #                 month INTEGER NOT NULL,
-    #                 year INTEGER NOT NULL,
-    #                 amount REAL NOT NULL,
-    #                 FOREIGN KEY (month) REFERENCES dates (month),
-    #                 FOREIGN KEY (year) REFERENCES dates (year)
-    #                 );"""
-    #     self.execute_sql_query(query)
+    def create_monthly_summary_table(self):
+        query = """CREATE TABLE IF NOT EXISTS monthly_summaries(
+                    month_ID INTEGER PRIMARY KEY,
+                    month INTEGER NOT NULL,
+                    year INTEGER NOT NULL,
+                    working_days INTEGER NOT NULL DEFAULT 0,
+                    total_hours VARCHAR NOT NULL DEFAULT '0',
+                    average_hours_per_day VARCHAR NOT NULL DEFAULT '0',
+                    kilometers INTEGER NOT NULL DEFAULT 0,
+                    refuels INTEGER NOT NULL DEFAULT 0,
+                    fuel_standard REAL NOT NULL DEFAULT 0,
+                    difference INTEGER NOT NULL DEFAULT 0,
+                    salary REAL NOT NULL DEFAULT 0,                   
+                    FOREIGN KEY (month, year) REFERENCES daily_summaries (month, year) ON DELETE CASCADE
+                    );"""
+        self.execute_sql_query(query)
+
+    def create_yearly_summary_table(self):
+        query = """CREATE TABLE IF NOT EXISTS yearly_summaries(
+                    year_ID INTEGER PRIMARY KEY,
+                    year INTEGER NOT NULL,
+                    working_days INTEGER NOT NULL DEFAULT 0,
+                    total_hours VARCHAR NOT NULL DEFAULT '0',
+                    average_hours_per_day VARCHAR NOT NULL DEFAULT '0',
+                    kilometers INTEGER NOT NULL DEFAULT 0,
+                    refuels INTEGER NOT NULL DEFAULT 0,
+                    fuel_standard REAL NOT NULL DEFAULT 0,
+                    salary INTEGER NOT NULL DEFAULT 0,
+                    average_salary_per_month INTEGER NOT NULL DEFAULT '0',
+                    FOREIGN KEY (year) REFERENCES monthly_summaries (year) ON DELETE CASCADE
+                    );"""
+        self.execute_sql_query(query)
 
     def create_tables(self):
-        self.create_day_detail_table()
-        # self.create_salary_table()
+        self.create_daily_summary_table()
+        self.create_monthly_summary_table()
+        self.create_yearly_summary_table()
 
-    def add_day_detail(self, day, month, year, start, end, hours, kilometers, refuel,
-                       standard_fuel_usage, fuel_difference):
-        query = "INSERT INTO day_details (day, month, year, start, end, hours, " \
+    def add_daily_summary(self, day, month, year, start, end, hours, kilometers, refuel,
+                          standard_fuel_usage, fuel_difference):
+        query = "INSERT INTO daily_summaries (day, month, year, start, end, hours, " \
                 "kilometers, refuel, standard_fuel_usage, fuel_difference) " \
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         self.execute_sql_query(query, (day, month, year, start, end, hours, kilometers, refuel,
                                        standard_fuel_usage, fuel_difference))
 
-    def show_all_days(self):
-        query = "SELECT * FROM day_details ORDER BY day, month, year"
-        result = self.execute_sql_query(query, fetch_option = "fetchall")
+    def check_that_monthly_summary_exist(self, month, year):
+        check_query = "SELECT * FROM monthly_summaries WHERE month = ? AND year = ?"
+        existing_summary = self.execute_sql_query(check_query, (month, year), fetch_option = "fetchone")
+        if existing_summary:
+            return True
+        else:
+            return False
+
+    def add_monthly_summary(self, month, year):
+        insert_query = "INSERT INTO monthly_summaries (month, year) VALUES (?, ?)"
+        self.execute_sql_query(insert_query, (month, year))
+
+    def show_daily_summaries_per_month(self, month, year):
+        query = "SELECT * FROM daily_summaries WHERE month = ? AND year = ? ORDER BY day"
+        result = self.execute_sql_query(query, (month, year), fetch_option = "fetchall")
         return result
+
+    def update_monthly_summary(self, month, year, working_days, total_hours, average_hours_per_day, kilometers,
+                               refuels, fuel_standard, difference, salary):
+        query = "UPDATE monthly_summaries SET working_days = ?, total_hours = ?, average_hours_per_day = ?, " \
+                "kilometers = ?, refuels = ?, fuel_standard = ?, difference = ?, salary = ? WHERE month = ? AND year = ?"
+        self.execute_sql_query(query, (working_days, total_hours, average_hours_per_day, kilometers, refuels, fuel_standard,
+                                       difference, salary, month, year))
+
+    def show_monthly_summary(self, month, year):
+        query = "SELECT * FROM monthly_summaries WHERE month = ? AND year = ?"
+        monthly_summary = self.execute_sql_query(query, (month, year), fetch_option = "fetchone")
+        return monthly_summary
 
