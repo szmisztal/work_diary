@@ -1,6 +1,6 @@
 from datetime import datetime
 from db_utils import SQLite
-from config_variables import db_file, month, year, daily_rate, hourly_rate
+from config_variables import db_file, month, year, daily_rate, hourly_rate, old_daily_rate, old_hourly_rate
 
 
 class App:
@@ -98,7 +98,7 @@ class App:
             refuels = sum([i[8] for i in days_details_list])
             fuel_standard = round(refuels * 100 / kilometers)
             difference = sum([i[10] for i in days_details_list])
-            salary = self.calculate_salary(daily_rate, working_days, hourly_rate, total_hours)
+            salary = self.calculate_salary(working_days, total_hours)
             self.db.update_monthly_summary(month, year, working_days, total_hours, average_hours_per_day,
                                            kilometers, refuels, fuel_standard, difference, salary)
             monthly_summary = self.db.show_monthly_summary(month, year)
@@ -138,7 +138,7 @@ class App:
         difference = standard_fuel_usage - refuel
         return difference
 
-    def calculate_salary(self, daily_rate, working_days, hourly_rate, total_hours):
+    def calculate_salary(self, working_days, total_hours):
         salary = (daily_rate * working_days) + (hourly_rate * total_hours)
         return round(salary, 2)
 
