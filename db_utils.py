@@ -119,8 +119,8 @@ class SQLite:
         self.execute_sql_query(query, (working_days, total_hours, average_hours_per_day, kilometers, refuels, fuel_standard,
                                        difference, salary, month, year))
 
-    def show_monthly_summary(self, month, year):
-        query = "SELECT * FROM monthly_summaries WHERE month = ? AND year = ?"
-        monthly_summary = self.execute_sql_query(query, (month, year), fetch_option = "fetchone")
+    def show_monthly_summary(self, year):
+        query = "SELECT * FROM monthly_summaries WHERE year = ? ORDER BY month"
+        monthly_summary = self.execute_sql_query(query, (year, ), fetch_option = "fetchall")
         return monthly_summary
 
