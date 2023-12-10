@@ -35,7 +35,7 @@ class SQLite:
 
     def create_daily_summary_table(self):
         query = """CREATE TABLE IF NOT EXISTS daily_summaries(
-                    date_id INTEGER PRIMARY KEY,
+                    day_id INTEGER PRIMARY KEY,
                     day INTEGER NOT NULL,
                     month INTEGER NOT NULL,
                     year INTEGER NOT NULL,
@@ -72,12 +72,12 @@ class SQLite:
                     year INTEGER NOT NULL,
                     working_days INTEGER NOT NULL DEFAULT 0,
                     total_hours VARCHAR NOT NULL DEFAULT '0',
-                    average_hours_per_day VARCHAR NOT NULL DEFAULT '0',
+                    average_hours_per_month VARCHAR NOT NULL DEFAULT '0',
                     kilometers INTEGER NOT NULL DEFAULT 0,
                     refuels INTEGER NOT NULL DEFAULT 0,
                     fuel_standard REAL NOT NULL DEFAULT 0,
                     salary INTEGER NOT NULL DEFAULT 0,
-                    average_salary_per_month INTEGER NOT NULL DEFAULT '0',
+                    average_salary_per_month REAL NOT NULL DEFAULT 0,
                     FOREIGN KEY (year) REFERENCES monthly_summaries (year) ON DELETE CASCADE
                     );"""
         self.execute_sql_query(query)
@@ -107,13 +107,35 @@ class SQLite:
         insert_query = "INSERT INTO monthly_summaries (month, year) VALUES (?, ?)"
         self.execute_sql_query(insert_query, (month, year))
 
+    def check_that_yearly_summary_exist(self, year):
+        check_query = "SELECT * FROM yearly_summaries WHERE year = ?"
+        existing_summary = self.execute_sql_query(check_query, (year, ), fetch_option = "fetchone")
+        if existing_summary:
+            return True
+        else:
+            return False
+
+    def add_yearly_summary(self, year):
+        insert_query = "INSERT INTO yearly_summaries (year) VALUES (?)"
+        self.execute_sql_query(insert_query, (year, ))
+
     def show_daily_summaries_per_month(self, month, year):
         query = "SELECT * FROM daily_summaries WHERE month = ? AND year = ? ORDER BY day"
         result = self.execute_sql_query(query, (month, year), fetch_option = "fetchall")
         return result
 
-    def update_monthly_summary(self, month, year, working_days, total_hours, average_hours_per_day, kilometers,
-                               refuels, fuel_standard, difference, salary):
+    def get_months_for_update(self, year):
+        query = "SELECT * FROM monthly_summaries WHERE year = ?"
+        result = self.execute_sql_query(query, (year, ), fetch_option = "fetchall")
+        return result
+
+    def get_years_for_update(self):
+        query = "SELECT * FROM yearly_summaries"
+        result = self.execute_sql_query(query, fetch_option = "fetchall")
+        return result
+
+    def update_monthly_summaries(self, month, year, working_days, total_hours, average_hours_per_day, kilometers,
+                                 refuels, fuel_standard, difference, salary):
         query = "UPDATE monthly_summaries SET working_days = ?, total_hours = ?, average_hours_per_day = ?, " \
                 "kilometers = ?, refuels = ?, fuel_standard = ?, difference = ?, salary = ? WHERE month = ? AND year = ?"
         self.execute_sql_query(query, (working_days, total_hours, average_hours_per_day, kilometers, refuels, fuel_standard,
@@ -124,3 +146,14 @@ class SQLite:
         monthly_summary = self.execute_sql_query(query, (year, ), fetch_option = "fetchall")
         return monthly_summary
 
+    def update_yearly_summaries(self, year, working_days, total_hours, average_hours_per_month, kilometers, refuels,
+                                fuel_standard, salary, average_salary_per_month):
+        query = "UPDATE yearly_summaries SET working_days = ?, total_hours = ?, average_hours_per_month = ?, " \
+                "kilometers = ?, refuels = ?, fuel_standard = ?, salary = ?, average_salary_per_month = ? WHERE year = ?"
+        self.execute_sql_query(query, (working_days, total_hours, average_hours_per_month, kilometers, refuels, fuel_standard,
+                                       salary, average_salary_per_month, year))
+
+    def show_yearly_summary(self):
+        query = "SELECT * FROM yearly_summaries ORDER BY year"
+        yearly_summary = self.execute_sql_query(query, fetch_option = "fetchall")
+        return yearly_summary
