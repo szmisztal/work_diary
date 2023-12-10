@@ -29,14 +29,14 @@ def calculate_average_hours(details_list, index):
     constant = len(details_list)
     total_seconds_list = [hours_to_seconds(i[index]) for i in details_list]
     total_seconds = sum(total_seconds_list)
-    average_hours = total_seconds / 3600 / constant
+    average_hours = round(total_seconds / 3600 / constant, 2)
     return str(average_hours)
 
 def calculate_average_hours_for_yearly_summary(details_list, index):
     constant = len(details_list)
     total_seconds_list = [hours_to_second_for_yearly_total_hour((i[index])) for i in details_list]
     total_seconds = sum(total_seconds_list)
-    average_hours = total_seconds / 3600 / constant
+    average_hours = round(total_seconds / 3600 / constant, 2)
     return str(average_hours)
 
 def hours_to_seconds(time_str):
@@ -49,7 +49,7 @@ def hours_to_second_for_yearly_total_hour(time_str):
 
 def calculate_standard_fuel_usage(kilometers):
     standard_usage = kilometers * 0.25
-    return round(standard_usage)
+    return round(standard_usage, 2)
 
 def calculate_fuel_difference(refuel, standard_fuel_usage):
     difference = standard_fuel_usage - refuel
