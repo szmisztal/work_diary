@@ -14,13 +14,13 @@ def calculate_hours(start_hour_string, end_hour_string):
         return hour_strings_list[0]
 
 def calculate_total_hours(details_list, index):
-    total_seconds_list = [hours_to_seconds((i[index])) for i in details_list]
+    total_seconds_list = [hours_to_seconds(i[index]) for i in details_list]
     total_seconds = sum(total_seconds_list)
     total_hours = total_seconds / 3600
-    return total_hours
+    return round(total_hours)
 
 def calculate_total_hours_for_yearly_summary(details_list, index):
-    total_seconds_list = [hours_to_second_for_yearly_total_hour((i[index])) for i in details_list]
+    total_seconds_list = [hours_to_second_for_yearly_total_hour(i[index]) for i in details_list]
     total_seconds = sum(total_seconds_list)
     total_hours = total_seconds / 3600
     return total_hours
@@ -34,7 +34,7 @@ def calculate_average_hours(details_list, index):
 
 def calculate_average_hours_for_yearly_summary(details_list, index):
     constant = len(details_list)
-    total_seconds_list = [hours_to_second_for_yearly_total_hour((i[index])) for i in details_list]
+    total_seconds_list = [hours_to_second_for_yearly_total_hour(i[index]) for i in details_list]
     total_seconds = sum(total_seconds_list)
     average_hours = round(total_seconds / 3600 / constant, 2)
     return str(average_hours)
@@ -44,8 +44,7 @@ def hours_to_seconds(time_str):
     return h * 3600 + m * 60 + s
 
 def hours_to_second_for_yearly_total_hour(time_str):
-    h, m = map(int, time_str.split("."))
-    return h * 3600 + m * 60
+    return int(time_str) * 3600
 
 def calculate_standard_fuel_usage(kilometers):
     standard_usage = kilometers * 0.25
@@ -57,4 +56,4 @@ def calculate_fuel_difference(refuel, standard_fuel_usage):
 
 def calculate_salary(daily_rate, working_days, hourly_rate, total_hours):
     salary = (daily_rate * working_days) + (hourly_rate * total_hours)
-    return round(salary, 2)
+    return salary
