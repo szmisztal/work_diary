@@ -14,7 +14,9 @@ class App:
             "2": "Show monthly summary by days",
             "3": "Show yearly summary by months",
             "4": "Show yearly summaries",
-            "5": "Stop app"
+            "5": "Add new invoice",
+            "6": "Show invoices",
+            "7": "Stop app"
         }
 
     def read_dict(self, dict):
@@ -143,7 +145,7 @@ class App:
                 refuels = sum([i[7] for i in monthly_summaries])
                 fuel_standard = round(refuels * 100 / kilometers, 2)
                 salary = sum([i[10] for i in monthly_summaries])
-                average_salary_per_month = salary / len(monthly_summaries)
+                average_salary_per_month = round(salary / len(monthly_summaries), 2)
                 self.db.update_yearly_summaries(year[1], working_days, str(total_hours), average_hours_per_month, kilometers,
                                                 refuels, fuel_standard, salary, average_salary_per_month)
         except Exception as e:
@@ -177,6 +179,32 @@ class App:
         except Exception as e:
             print(e)
 
+    def add_new_invoice(self):
+        try:
+            month = int(input("MONTH: "))
+            year = int(input("YEAR: "))
+            value = float(input("VALUE: "))
+            self.db.add_invoice(month, year, value)
+        except Exception as e:
+            print(e)
+
+    def show_invoices(self):
+        try:
+            year = int(input("YEAR (if you want to see all invoices, tap '0'): "))
+            if isinstance(year, int):
+                invoices = self.db.get_invoices(year)
+            elif year == 0:
+                invoices = self.db.get_invoices()
+            print("--------")
+            invoice_sum = []
+            for invoice in invoices:
+                print(f"{invoice[1]}.{invoice[2]} --- VALUE: {invoice[3]}")
+                invoice_sum.append(invoice[3])
+            print("--------")
+            print(f"SUM: {round(sum(invoice_sum), 2)}")
+        except Exception as e:
+            print(e)
+
     def start(self):
         self.is_running = True
         print("Hello !")
@@ -193,6 +221,10 @@ class App:
                 elif command_input == "4":
                     self.show_yearly_summaries()
                 elif command_input == "5":
+                    self.add_new_invoice()
+                elif command_input == "6":
+                    self.show_invoices()
+                elif command_input == "7":
                     print("Bye !")
                     self.is_running = False
                 else:
