@@ -82,10 +82,34 @@ class SQLite:
                     );"""
         self.execute_sql_query(query)
 
+    def create_invoice_table(self):
+        query = """CREATE TABLE IF NOT EXISTS invoices(
+                    invoice_id INTEGER PRIMARY KEY,
+                    month INTEGER NOT NULL,
+                    year INTEGER NOT NULL,
+                    value REAL NOT NULL,
+                    FOREIGN KEY (month, year) REFERENCES monthly_summaries (month, year) ON DELETE CASCADE
+                    );"""
+        self.execute_sql_query(query)
+
     def create_tables(self):
         self.create_daily_summary_table()
         self.create_monthly_summary_table()
         self.create_yearly_summary_table()
+        self.create_invoice_table()
+
+    def add_invoice(self, month, year, value):
+        query = "INSERT INTO invoices (month, year, value) VALUES (?, ?, ?)"
+        self.execute_sql_query(query, (month, year, value))
+
+    def get_invoices(self, year = None):
+        if year:
+            query = "SELECT * FROM invoices WHERE year = ?"
+            invoices = self.execute_sql_query(query, (year, ), fetch_option = "fetchall")
+        else:
+            query = "SELECT * FROM invoices"
+            invoices = self.execute_sql_query(query, fetch_option = "fetchall")
+        return invoices
 
     def add_daily_summary(self, day, month, year, start, end, hours, kilometers, refuel,
                           standard_fuel_usage, fuel_difference):
