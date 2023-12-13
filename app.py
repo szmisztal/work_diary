@@ -14,8 +14,8 @@ class App:
             "2": "Show monthly summary by days",
             "3": "Show yearly summary by months",
             "4": "Show yearly summaries",
-            "5": "Add new invoice",
-            "6": "Show invoices",
+            "5": "Add new invoice (with VAT)",
+            "6": "Show invoices (with VAT)",
             "7": "Stop app"
         }
 
@@ -127,6 +127,9 @@ class App:
                     salary = calculate_salary(old_daily_rate, working_days, old_hourly_rate, total_hours)
                 elif year >= 2023 and month[1] > 2:
                     salary = calculate_salary(daily_rate, working_days, hourly_rate, total_hours)
+                if working_days > 20:
+                    bonus = working_days - 20
+                    salary += bonus * 100
                 self.db.update_monthly_summaries(month[1], year, working_days, str(total_hours), average_hours_per_day,
                                                  kilometers, refuels, fuel_standard, difference, salary)
         except Exception as e:
