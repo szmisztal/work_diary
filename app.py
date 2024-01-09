@@ -125,7 +125,7 @@ class App:
                 difference = sum([i[10] for i in daily_summaries])
                 if year <= 2023 and month[1] <= 2:
                     salary = calculate_salary(old_daily_rate, working_days, old_hourly_rate, total_hours)
-                elif year >= 2023 and month[1] > 2:
+                else:
                     salary = calculate_salary(daily_rate, working_days, hourly_rate, total_hours)
                 if working_days > 20:
                     bonus = working_days - 20
