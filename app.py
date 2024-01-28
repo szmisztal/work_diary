@@ -15,7 +15,7 @@ class App:
             "3": "Show yearly summary by months",
             "4": "Show yearly summaries",
             "5": "Add new invoice (with VAT)",
-            "6": "Show invoices (with VAT)",
+            "6": "Show invoices",
             "7": "Stop app"
         }
 
@@ -193,6 +193,7 @@ class App:
 
     def show_invoices(self):
         try:
+            vat_option = input("WITH VAT - 1, WITHOUT VAT - 2: ")
             year = int(input("YEAR (if you want to see all invoices, tap '0'): "))
             if isinstance(year, int):
                 invoices = self.db.get_invoices(year)
@@ -201,10 +202,18 @@ class App:
             print("--------")
             invoice_sum = []
             for invoice in invoices:
-                print(f"{invoice[1]}.{invoice[2]} --- VALUE: {invoice[3]}")
-                invoice_sum.append(invoice[3])
+                if vat_option == "1":
+                    print(f"{invoice[1]}.{invoice[2]} --- VALUE: {invoice[3]}")
+                    invoice_sum.append(invoice[3])
+                elif vat_option == "2":
+                    invoice_without_vat = round(float(invoice[3]) - (invoice[3] * 23 / 100), 2)
+                    print(f"{invoice[1]}.{invoice[2]} --- VALUE: {invoice_without_vat}")
+                    invoice_sum.append(invoice_without_vat)
             print("--------")
-            print(f"SUM: {round(sum(invoice_sum), 2)}")
+            if vat_option == "1":
+                print(f"SUM WITH VAT: {round(sum(invoice_sum), 2)}")
+            elif vat_option == "2":
+                print(f"SUM WITHOUT VAT: {round(sum(invoice_sum), 2)}")
         except Exception as e:
             print(e)
 
