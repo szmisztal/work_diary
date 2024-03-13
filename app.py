@@ -2,7 +2,7 @@ from db_utils import SQLite
 from calculate_functions import calculate_salary, calculate_hours, calculate_total_hours, \
     calculate_average_hours, calculate_fuel_difference, calculate_standard_fuel_usage, calculate_total_hours_for_yearly_summary, \
     calculate_average_hours_for_yearly_summary
-from config_variables import db_file, hourly_rate, daily_rate, old_hourly_rate, old_daily_rate
+from config_variables import db_file, hourly_rate, daily_rate, old_hourly_rate, old_daily_rate, new_daily_rate, new_hourly_rate
 
 
 class App:
@@ -125,8 +125,10 @@ class App:
                 difference = sum([i[10] for i in daily_summaries])
                 if year <= 2023 and month[1] <= 2:
                     salary = calculate_salary(old_daily_rate, working_days, old_hourly_rate, total_hours)
-                else:
+                elif year == 2023 and month[1] > 2 or year == 2024 and month[1] <= 2:
                     salary = calculate_salary(daily_rate, working_days, hourly_rate, total_hours)
+                else:
+                    salary = calculate_salary(new_daily_rate, working_days, new_hourly_rate, total_hours)
                 if working_days > 20:
                     bonus = working_days - 20
                     salary += bonus * 100
